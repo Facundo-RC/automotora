@@ -185,19 +185,26 @@ function pintarGrilla(vehiculos) {
 }
 
 function plantillaTarjeta(v) {
-  const imagen = v.imagenUrl || 'img/vehiculos/sin-foto.svg';
+  // El catálogo no publica fotos: la tarjeta se apoya en la ficha técnica.
+  // Si algún día se carga una imagen, se muestra arriba de todo.
+  const figura = v.imagenUrl
+    ? `<div class="tarjeta__figura">
+         <img src="${escapar(v.imagenUrl)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}" loading="lazy">
+       </div>`
+    : '';
 
   return `
     <article class="tarjeta ${v.vendido ? 'tarjeta--vendida' : ''}">
-      <div class="tarjeta__figura">
-        <img src="${escapar(imagen)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}" loading="lazy"
-             onerror="this.src='img/vehiculos/sin-foto.svg'">
-        ${v.vendido ? '<span class="etiqueta">Vendido</span>' : ''}
-      </div>
+      ${figura}
 
       <div class="tarjeta__cuerpo">
-        <p class="tarjeta__marca">${escapar(v.marca)}</p>
+        <div class="tarjeta__encabezado">
+          <p class="tarjeta__marca">${escapar(v.marca)}</p>
+          ${v.vendido ? '<span class="etiqueta">Vendido</span>' : ''}
+        </div>
+
         <h3 class="tarjeta__titulo">${escapar(v.modelo)}</h3>
+        <p class="tarjeta__precio">${formatearPrecio(v.precio)}</p>
 
         <ul class="fichas">
           <li>${v.anio}</li>
@@ -206,9 +213,10 @@ function plantillaTarjeta(v) {
           <li>${escapar(etiqueta(v.transmision))}</li>
         </ul>
 
+        ${v.descripcion ? `<p class="tarjeta__desc">${escapar(v.descripcion)}</p>` : ''}
+
         <div class="tarjeta__pie">
-          <p class="tarjeta__precio">${formatearPrecio(v.precio)}</p>
-          <button class="boton boton--primario boton--chico" data-detalle="${v.id}">Ver ficha</button>
+          <button class="boton boton--primario boton--bloque" data-detalle="${v.id}">Ver ficha</button>
         </div>
 
         <div class="tarjeta__gestion" data-solo-admin>
@@ -228,12 +236,10 @@ function plantillaTarjeta(v) {
 async function abrirDetalle(id) {
   try {
     const v = await api.obtenerVehiculo(id);
-    const imagen = v.imagenUrl || 'img/vehiculos/sin-foto.svg';
 
     el.detalleTitulo.textContent = `${v.marca} ${v.modelo}`;
     el.detalleCuerpo.innerHTML = `
-      <img class="ficha__imagen" src="${escapar(imagen)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}"
-           onerror="this.src='img/vehiculos/sin-foto.svg'">
+      ${v.imagenUrl ? `<img class="ficha__imagen" src="${escapar(v.imagenUrl)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}">` : ''}
 
       <p class="ficha__precio">${formatearPrecio(v.precio)}</p>
       ${v.vendido ? '<p class="ficha__estado">Este vehículo ya fue vendido.</p>' : ''}

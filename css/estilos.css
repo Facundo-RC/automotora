@@ -344,9 +344,17 @@ body.modo-admin .boton--contorno {
 
 .campo--acciones { display: flex; align-items: flex-end; }
 
-/* ---------- Tarjeta ---------- */
+/* ---------- Tarjeta ----------
+   El catálogo no publica fotos, así que la tarjeta se ordena por jerarquía
+   de texto: marca, modelo, precio y ficha técnica. */
 
-.tarjeta__figura { position: relative; }
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--acento);
+}
+
+.tarjeta--vendida { opacity: .72; }
 
 .tarjeta__figura img {
   width: 100%;
@@ -355,7 +363,20 @@ body.modo-admin .boton--contorno {
   display: block;
 }
 
-.tarjeta--vendida .tarjeta__figura img { filter: grayscale(.85); opacity: .75; }
+.tarjeta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.tarjeta__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  min-height: 1.3rem;
+}
 
 .tarjeta__marca {
   margin: 0;
@@ -366,35 +387,50 @@ body.modo-admin .boton--contorno {
   opacity: .5;
 }
 
-.tarjeta__titulo { margin: .15rem 0 .7rem; font-size: 1.12rem; }
+.tarjeta__titulo {
+  margin: .2rem 0 .5rem;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.tarjeta__precio {
+  margin: 0 0 .9rem;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--acento);
+}
 
 .fichas {
   display: flex;
   flex-wrap: wrap;
   gap: .35rem;
-  margin: 0 0 .9rem;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .fichas li {
-  padding: .2rem .55rem;
+  padding: .22rem .6rem;
   border-radius: 999px;
   background: rgba(0, 0, 0, .05);
   font-size: .78rem;
   white-space: nowrap;
 }
 
-.tarjeta__pie {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .8rem;
-  padding-top: .8rem;
-  border-top: 1px solid rgba(0, 0, 0, .08);
+.tarjeta__desc {
+  margin: .85rem 0 0;
+  font-size: .88rem;
+  line-height: 1.55;
+  opacity: .75;
 }
 
-.tarjeta__precio { margin: 0; font-size: 1.3rem; font-weight: 700; }
+/* El pie se pega abajo para que todas las tarjetas terminen parejas. */
+.tarjeta__pie {
+  margin-top: auto;
+  padding-top: 1.1rem;
+}
+
+.boton--bloque { display: block; width: 100%; }
 
 .tarjeta__gestion {
   display: flex;
