@@ -236,3 +236,226 @@ textarea { resize: vertical; }
   .banner-demo strong { color: #f6ecd4; }
   .banner-demo a { color: #f0c76a; }
 }
+
+/* ===================================================================
+   Rediseño: vista de cliente por defecto, gestión detrás de un modo
+   =================================================================== */
+
+/* Las acciones de gestión sólo existen en modo administrador. */
+body:not(.modo-admin) [data-solo-admin] { display: none !important; }
+
+/* ---------- Cabecera ---------- */
+
+/* La cabecera original tenia alto fijo: al envolver en pantallas chicas se
+   desbordaba por encima del cartel. Pasa a crecer con su contenido. */
+.cabecera__interior {
+  height: auto;
+  min-height: 66px;
+  flex-wrap: wrap;
+  gap: .7rem;
+  padding: .7rem 0;
+}
+
+.cabecera__acciones {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.logo {
+  display: grid;
+  line-height: 1.15;
+}
+
+.logo__sub {
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .55;
+}
+
+.boton--contorno {
+  background: transparent;
+  border: 1px solid currentColor;
+  opacity: .75;
+  font-size: .85rem;
+}
+.boton--contorno:hover { opacity: 1; }
+
+body.modo-admin .boton--contorno {
+  background: #7d1f2e;
+  border-color: #7d1f2e;
+  color: #fff;
+  opacity: 1;
+}
+
+.boton--chico { padding: .42rem .8rem; font-size: .85rem; }
+
+/* ---------- Filtros ---------- */
+
+.filtros__principal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+.filtros__principal .campo--ancho { flex: 1 1 320px; }
+.filtros__principal .campo { flex: 0 1 220px; }
+
+.filtros__avanzados { margin-top: .9rem; }
+
+.filtros__avanzados summary {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  cursor: pointer;
+  font-size: .88rem;
+  font-weight: 600;
+  padding: .3rem 0;
+  opacity: .75;
+  list-style: none;
+}
+
+.filtros__avanzados summary::-webkit-details-marker { display: none; }
+
+/* Flecha propia, que gira al abrir. */
+.filtros__avanzados summary::before {
+  content: "";
+  width: .5rem;
+  height: .5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform .15s ease;
+}
+
+.filtros__avanzados[open] summary::before { transform: rotate(45deg); }
+.filtros__avanzados summary:hover { opacity: 1; }
+
+.filtros__grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+  margin-top: .9rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.campo--acciones { display: flex; align-items: flex-end; }
+
+/* ---------- Tarjeta ---------- */
+
+.tarjeta__figura { position: relative; }
+
+.tarjeta__figura img {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.tarjeta--vendida .tarjeta__figura img { filter: grayscale(.85); opacity: .75; }
+
+.tarjeta__marca {
+  margin: 0;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  opacity: .5;
+}
+
+.tarjeta__titulo { margin: .15rem 0 .7rem; font-size: 1.12rem; }
+
+.fichas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: 0 0 .9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.fichas li {
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .05);
+  font-size: .78rem;
+  white-space: nowrap;
+}
+
+.tarjeta__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding-top: .8rem;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.tarjeta__precio { margin: 0; font-size: 1.3rem; font-weight: 700; }
+
+.tarjeta__gestion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .8rem;
+  padding-top: .8rem;
+  border-top: 1px dashed rgba(0, 0, 0, .14);
+}
+
+/* ---------- Ficha del vehículo ---------- */
+
+.modal__caja--ficha { max-width: 560px; }
+
+.ficha { padding: 0 1.4rem 1.4rem; }
+
+.ficha__imagen {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1.1rem;
+}
+
+.ficha__precio { margin: 0 0 .3rem; font-size: 1.7rem; font-weight: 700; }
+
+.ficha__estado {
+  margin: 0 0 .8rem;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #b3372c;
+}
+
+.ficha__datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: .7rem 1.2rem;
+  margin: 1.1rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.ficha__datos dt {
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  opacity: .55;
+}
+
+.ficha__datos dd { margin: .15rem 0 0; font-weight: 600; }
+
+.ficha__descripcion {
+  margin: 1.1rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+  line-height: 1.65;
+}
+
+@media (max-width: 640px) {
+  .filtros__principal .campo,
+  .filtros__principal .campo--ancho { flex: 1 1 100%; }
+  .cabecera__acciones { width: 100%; }
+  .cabecera__acciones .boton { flex: 1; }
+}

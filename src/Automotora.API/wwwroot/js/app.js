@@ -9,8 +9,13 @@ const estado = {
   pagina: 1,
   tamanoPagina: 12,
   marcas: [],
-  cargando: false
+  cargando: false,
+  // La vista de cliente es la que se ve al entrar. Las acciones de gestion
+  // (publicar, editar, marcar vendido, borrar) viven detras del modo administrador.
+  modoAdmin: false
 };
+
+const CLAVE_MODO = 'automotora:modoAdmin';
 
 // Cache de nodos usados seguido.
 const el = {};
@@ -25,6 +30,7 @@ function iniciar() {
     if (banner) banner.hidden = false;
   });
 
+  recuperarModo();
   cargarMarcas().then(buscar);
 }
 
@@ -34,13 +40,47 @@ function cachearElementos() {
     'fPrecioMin','fPrecioMax','fOrden','fDisponibles','btnLimpiar',
     'grilla','resumen','paginado','modal','modalTitulo','formVehiculo',
     'btnNuevo','btnCerrar','btnCancelar','btnGuardar','formError','aviso',
+    'btnModo','modalDetalle','detalleTitulo','detalleCuerpo','btnCerrarDetalle',
     'vId','vMarca','vModelo','vAnio','vPrecio','vKm','vCombustible',
     'vTransmision','vColor','vImagen','vDescripcion','vVendido'
   ];
   ids.forEach(id => { el[id] = document.getElementById(id); });
 }
 
+/** Muestra u oculta las acciones de gestion y deja el estado guardado. */
+function aplicarModo() {
+  document.body.classList.toggle('modo-admin', estado.modoAdmin);
+  el.btnModo.textContent = estado.modoAdmin ? 'Salir del modo administrador' : 'Modo administrador';
+  el.btnModo.setAttribute('aria-pressed', String(estado.modoAdmin));
+
+  try {
+    localStorage.setItem(CLAVE_MODO, estado.modoAdmin ? '1' : '0');
+  } catch {
+    // Si el navegador bloquea el almacenamiento, el modo dura lo que dure la visita.
+  }
+}
+
+function recuperarModo() {
+  try {
+    estado.modoAdmin = localStorage.getItem(CLAVE_MODO) === '1';
+  } catch {
+    estado.modoAdmin = false;
+  }
+  aplicarModo();
+}
+
 function registrarEventos() {
+  el.btnModo.addEventListener('click', () => {
+    estado.modoAdmin = !estado.modoAdmin;
+    aplicarModo();
+    mostrarAviso(estado.modoAdmin
+      ? 'Modo administrador activado: ya podes publicar, editar y dar de baja.'
+      : 'Volviste a la vista de cliente.');
+  });
+
+  el.btnCerrarDetalle.addEventListener('click', cerrarDetalle);
+  el.modalDetalle.addEventListener('click', (e) => { if (e.target === el.modalDetalle) cerrarDetalle(); });
+
   // Los filtros de texto y número esperan a que el usuario deje de escribir.
   ['fTexto','fAnioMin','fAnioMax','fPrecioMin','fPrecioMax']
     .forEach(id => el[id].addEventListener('input', conRetraso(reiniciarYBuscar, 400)));
@@ -57,7 +97,9 @@ function registrarEventos() {
   // Cerrar el modal con clic afuera o con Escape.
   el.modal.addEventListener('click', (e) => { if (e.target === el.modal) cerrarModal(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !el.modal.hidden) cerrarModal();
+    if (e.key !== 'Escape') return;
+    if (!el.modal.hidden) cerrarModal();
+    if (!el.modalDetalle.hidden) cerrarDetalle();
   });
 }
 
@@ -129,6 +171,9 @@ function pintarGrilla(vehiculos) {
 
   el.grilla.innerHTML = vehiculos.map(plantillaTarjeta).join('');
 
+  el.grilla.querySelectorAll('[data-detalle]').forEach(boton =>
+    boton.addEventListener('click', () => abrirDetalle(Number(boton.dataset.detalle))));
+
   el.grilla.querySelectorAll('[data-editar]').forEach(boton =>
     boton.addEventListener('click', () => abrirModal(Number(boton.dataset.editar))));
 
@@ -140,34 +185,79 @@ function pintarGrilla(vehiculos) {
 }
 
 function plantillaTarjeta(v) {
-  const imagen = v.imagenUrl
-    ? `<img src="${escapar(v.imagenUrl)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}" loading="lazy"
-            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Sin imagen'}))">`
-    : '<span>Sin imagen</span>';
+  const imagen = v.imagenUrl || 'img/vehiculos/sin-foto.svg';
 
   return `
-    <article class="tarjeta">
+    <article class="tarjeta ${v.vendido ? 'tarjeta--vendida' : ''}">
       <div class="tarjeta__figura">
-        ${imagen}
+        <img src="${escapar(imagen)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}" loading="lazy"
+             onerror="this.src='img/vehiculos/sin-foto.svg'">
         ${v.vendido ? '<span class="etiqueta">Vendido</span>' : ''}
       </div>
+
       <div class="tarjeta__cuerpo">
-        <h3 class="tarjeta__titulo">${escapar(v.marca)} ${escapar(v.modelo)}</h3>
-        <p class="tarjeta__precio">${formatearPrecio(v.precio)}</p>
-        <p class="tarjeta__datos">
-          ${v.anio} · ${formatearKm(v.kilometraje)} · ${escapar(etiqueta(v.combustible))} · ${escapar(etiqueta(v.transmision))}
-        </p>
-        ${v.descripcion ? `<p class="tarjeta__desc">${escapar(v.descripcion)}</p>` : ''}
+        <p class="tarjeta__marca">${escapar(v.marca)}</p>
+        <h3 class="tarjeta__titulo">${escapar(v.modelo)}</h3>
+
+        <ul class="fichas">
+          <li>${v.anio}</li>
+          <li>${formatearKm(v.kilometraje)}</li>
+          <li>${escapar(etiqueta(v.combustible))}</li>
+          <li>${escapar(etiqueta(v.transmision))}</li>
+        </ul>
+
         <div class="tarjeta__pie">
-          <button class="boton boton--secundario" data-editar="${v.id}">Editar</button>
-          <button class="boton boton--secundario" data-vender="${v.id}" data-vendido="${v.vendido}">
-            ${v.vendido ? 'Reactivar' : 'Vendido'}
+          <p class="tarjeta__precio">${formatearPrecio(v.precio)}</p>
+          <button class="boton boton--primario boton--chico" data-detalle="${v.id}">Ver ficha</button>
+        </div>
+
+        <div class="tarjeta__gestion" data-solo-admin>
+          <button class="boton boton--secundario boton--chico" data-editar="${v.id}">Editar</button>
+          <button class="boton boton--secundario boton--chico" data-vender="${v.id}" data-vendido="${v.vendido}">
+            ${v.vendido ? 'Reactivar' : 'Marcar vendido'}
           </button>
-          <button class="boton boton--peligro" data-eliminar="${v.id}"
+          <button class="boton boton--peligro boton--chico" data-eliminar="${v.id}"
                   data-nombre="${escapar(v.marca)} ${escapar(v.modelo)}">Borrar</button>
         </div>
       </div>
     </article>`;
+}
+
+/* ============================ Ficha ============================ */
+
+async function abrirDetalle(id) {
+  try {
+    const v = await api.obtenerVehiculo(id);
+    const imagen = v.imagenUrl || 'img/vehiculos/sin-foto.svg';
+
+    el.detalleTitulo.textContent = `${v.marca} ${v.modelo}`;
+    el.detalleCuerpo.innerHTML = `
+      <img class="ficha__imagen" src="${escapar(imagen)}" alt="${escapar(v.marca)} ${escapar(v.modelo)}"
+           onerror="this.src='img/vehiculos/sin-foto.svg'">
+
+      <p class="ficha__precio">${formatearPrecio(v.precio)}</p>
+      ${v.vendido ? '<p class="ficha__estado">Este vehículo ya fue vendido.</p>' : ''}
+
+      <dl class="ficha__datos">
+        <div><dt>Año</dt><dd>${v.anio}</dd></div>
+        <div><dt>Kilometraje</dt><dd>${formatearKm(v.kilometraje)}</dd></div>
+        <div><dt>Combustible</dt><dd>${escapar(etiqueta(v.combustible))}</dd></div>
+        <div><dt>Transmisión</dt><dd>${escapar(etiqueta(v.transmision))}</dd></div>
+        <div><dt>Color</dt><dd>${escapar(v.color || 'Sin especificar')}</dd></div>
+        <div><dt>Publicado</dt><dd>${formatearFecha(v.fechaPublicacion)}</dd></div>
+      </dl>
+
+      ${v.descripcion ? `<p class="ficha__descripcion">${escapar(v.descripcion)}</p>` : ''}
+    `;
+
+    el.modalDetalle.hidden = false;
+  } catch (error) {
+    mostrarAviso(error.message, true);
+  }
+}
+
+function cerrarDetalle() {
+  el.modalDetalle.hidden = true;
 }
 
 function pintarResumen(r) {
@@ -361,6 +451,10 @@ const formateadorPrecio = new Intl.NumberFormat('es-UY', {
 const formateadorNumero = new Intl.NumberFormat('es-UY');
 
 const formatearPrecio = (valor) => formateadorPrecio.format(valor);
+
+const formatearFecha = (iso) => new Date(iso).toLocaleDateString('es-UY', {
+  day: '2-digit', month: 'long', year: 'numeric'
+});
 const formatearKm = (valor) => `${formateadorNumero.format(valor)} km`;
 
 /** Escapa texto antes de insertarlo en el HTML, para no abrir la puerta a XSS. */
