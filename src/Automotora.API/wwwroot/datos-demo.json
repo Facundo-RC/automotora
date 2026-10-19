@@ -1,0 +1,207 @@
+{
+  "_comentario": "Datos de ejemplo que usa el modo demo cuando la API no esta disponible. Son los mismos que siembra DatosDePrueba.cs.",
+  "marcas": [
+    {
+      "id": 1,
+      "nombre": "Chevrolet",
+      "cantidadVehiculos": 2
+    },
+    {
+      "id": 2,
+      "nombre": "Fiat",
+      "cantidadVehiculos": 1
+    },
+    {
+      "id": 3,
+      "nombre": "Ford",
+      "cantidadVehiculos": 1
+    },
+    {
+      "id": 4,
+      "nombre": "Peugeot",
+      "cantidadVehiculos": 1
+    },
+    {
+      "id": 5,
+      "nombre": "Renault",
+      "cantidadVehiculos": 1
+    },
+    {
+      "id": 6,
+      "nombre": "Suzuki",
+      "cantidadVehiculos": 1
+    },
+    {
+      "id": 7,
+      "nombre": "Toyota",
+      "cantidadVehiculos": 2
+    },
+    {
+      "id": 8,
+      "nombre": "Volkswagen",
+      "cantidadVehiculos": 1
+    }
+  ],
+  "vehiculos": [
+    {
+      "id": 1,
+      "marcaId": 1,
+      "marca": "Chevrolet",
+      "modelo": "Onix LT",
+      "anio": 2021,
+      "precio": 17500,
+      "kilometraje": 42000,
+      "combustible": "Nafta",
+      "transmision": "Manual",
+      "color": "Blanco",
+      "descripcion": "Único dueño, service oficial al día.",
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": 2,
+      "marcaId": 2,
+      "marca": "Fiat",
+      "modelo": "Cronos Drive",
+      "anio": 2022,
+      "precio": 19900,
+      "kilometraje": 28500,
+      "combustible": "Nafta",
+      "transmision": "Manual",
+      "color": "Gris",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-28T12:00:00Z"
+    },
+    {
+      "id": 3,
+      "marcaId": 3,
+      "marca": "Ford",
+      "modelo": "Ranger XLS",
+      "anio": 2019,
+      "precio": 34500,
+      "kilometraje": 96000,
+      "combustible": "Diesel",
+      "transmision": "Automatica",
+      "color": "Negro",
+      "descripcion": "4x4, cubiertas nuevas.",
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-25T12:00:00Z"
+    },
+    {
+      "id": 4,
+      "marcaId": 4,
+      "marca": "Peugeot",
+      "modelo": "208 Allure",
+      "anio": 2023,
+      "precio": 22300,
+      "kilometraje": 15400,
+      "combustible": "Nafta",
+      "transmision": "Automatica",
+      "color": "Azul",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-22T12:00:00Z"
+    },
+    {
+      "id": 5,
+      "marcaId": 5,
+      "marca": "Renault",
+      "modelo": "Kangoo Express",
+      "anio": 2018,
+      "precio": 14200,
+      "kilometraje": 132000,
+      "combustible": "Diesel",
+      "transmision": "Manual",
+      "color": "Blanco",
+      "descripcion": "Utilitario, ideal reparto.",
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": 6,
+      "marcaId": 6,
+      "marca": "Suzuki",
+      "modelo": "Vitara GLX",
+      "anio": 2020,
+      "precio": 26800,
+      "kilometraje": 61000,
+      "combustible": "Nafta",
+      "transmision": "Automatica",
+      "color": "Rojo",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-16T12:00:00Z"
+    },
+    {
+      "id": 7,
+      "marcaId": 7,
+      "marca": "Toyota",
+      "modelo": "Corolla XEI",
+      "anio": 2022,
+      "precio": 31500,
+      "kilometraje": 34000,
+      "combustible": "Hibrido",
+      "transmision": "Automatica",
+      "color": "Plata",
+      "descripcion": "Híbrido, muy bajo consumo.",
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-13T12:00:00Z"
+    },
+    {
+      "id": 8,
+      "marcaId": 8,
+      "marca": "Volkswagen",
+      "modelo": "Polo Comfortline",
+      "anio": 2021,
+      "precio": 21400,
+      "kilometraje": 47000,
+      "combustible": "Nafta",
+      "transmision": "Manual",
+      "color": "Gris",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-10T12:00:00Z"
+    },
+    {
+      "id": 9,
+      "marcaId": 7,
+      "marca": "Toyota",
+      "modelo": "Hilux SRV",
+      "anio": 2017,
+      "precio": 38900,
+      "kilometraje": 148000,
+      "combustible": "Diesel",
+      "transmision": "Automatica",
+      "color": "Gris",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": true,
+      "fechaPublicacion": "2026-09-07T12:00:00Z"
+    },
+    {
+      "id": 10,
+      "marcaId": 1,
+      "marca": "Chevrolet",
+      "modelo": "Spin LTZ",
+      "anio": 2016,
+      "precio": 15900,
+      "kilometraje": 121000,
+      "combustible": "Nafta",
+      "transmision": "Manual",
+      "color": "Negro",
+      "descripcion": null,
+      "imagenUrl": null,
+      "vendido": false,
+      "fechaPublicacion": "2026-09-04T12:00:00Z"
+    }
+  ]
+}

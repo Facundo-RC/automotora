@@ -1,0 +1,287 @@
+{
+  "info": {
+    "name": "Automotora API",
+    "description": "Colección de pruebas de la API de Automotora. Cada request incluye tests automáticos que validan código de estado, contrato de respuesta y reglas de negocio.\n\nVariables:\n- baseUrl: http://localhost:5186\n- vehiculoId: se completa solo al crear un vehículo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5186" },
+    { "key": "vehiculoId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Marcas",
+      "item": [
+        {
+          "name": "GET /api/marcas — lista las marcas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/marcas", "host": ["{{baseUrl}}"], "path": ["api", "marcas"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Devuelve un array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+              "pm.test('Cada marca trae id, nombre y cantidadVehiculos', () => {",
+              "  const marcas = pm.response.json();",
+              "  pm.expect(marcas.length).to.be.above(0);",
+              "  marcas.forEach(m => {",
+              "    pm.expect(m).to.have.property('id');",
+              "    pm.expect(m).to.have.property('nombre');",
+              "    pm.expect(m).to.have.property('cantidadVehiculos');",
+              "  });",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "POST /api/marcas — nombre vacío devuelve 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/marcas", "host": ["{{baseUrl}}"], "path": ["api", "marcas"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+              "pm.test('Incluye el detalle de validación', () => {",
+              "  pm.expect(pm.response.json()).to.have.property('errores');",
+              "});"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Vehículos",
+      "item": [
+        {
+          "name": "GET /api/vehiculos — listado paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos?pagina=1&tamanoPagina=5",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"],
+              "query": [
+                { "key": "pagina", "value": "1" },
+                { "key": "tamanoPagina", "value": "5" }
+              ]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "const r = pm.response.json();",
+              "pm.test('Trae la estructura de paginado', () => {",
+              "  ['items','pagina','tamanoPagina','totalItems','totalPaginas'].forEach(c => pm.expect(r).to.have.property(c));",
+              "});",
+              "pm.test('Respeta el tamaño de página pedido', () => pm.expect(r.items.length).to.be.at.most(5));",
+              "pm.test('Responde en menos de 1 segundo', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+            ]}
+          }]
+        },
+        {
+          "name": "GET /api/vehiculos — filtro por precio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos?precioMin=20000&precioMax=35000",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"],
+              "query": [
+                { "key": "precioMin", "value": "20000" },
+                { "key": "precioMax", "value": "35000" }
+              ]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Todos los resultados caen dentro del rango', () => {",
+              "  pm.response.json().items.forEach(v => {",
+              "    pm.expect(v.precio).to.be.at.least(20000);",
+              "    pm.expect(v.precio).to.be.at.most(35000);",
+              "  });",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "GET /api/vehiculos — tamanoPagina excesivo se topea",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos?tamanoPagina=9999",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"],
+              "query": [{ "key": "tamanoPagina", "value": "9999" }]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('El tamaño de página se limita a 50', () => {",
+              "  pm.expect(pm.response.json().tamanoPagina).to.eql(50);",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "POST /api/vehiculos — alta válida",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"marcaId\": 7,\n  \"modelo\": \"Yaris XS\",\n  \"anio\": 2021,\n  \"precio\": 18900,\n  \"kilometraje\": 39000,\n  \"combustible\": \"Nafta\",\n  \"transmision\": \"Manual\",\n  \"color\": \"Blanco\",\n  \"descripcion\": \"Alta creada desde Postman.\",\n  \"vendido\": false\n}" },
+            "url": { "raw": "{{baseUrl}}/api/vehiculos", "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+              "pm.test('Devuelve la cabecera Location', () => pm.expect(pm.response.headers.has('Location')).to.be.true);",
+              "const v = pm.response.json();",
+              "pm.test('Devuelve el vehículo creado con id', () => pm.expect(v.id).to.be.above(0));",
+              "pm.test('Resuelve el nombre de la marca', () => pm.expect(v.marca).to.eql('Toyota'));",
+              "pm.collectionVariables.set('vehiculoId', v.id);"
+            ]}
+          }]
+        },
+        {
+          "name": "POST /api/vehiculos — año inválido devuelve 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"marcaId\": 1,\n  \"modelo\": \"Modelo de prueba\",\n  \"anio\": 1500,\n  \"precio\": 10000,\n  \"kilometraje\": 1000,\n  \"combustible\": \"Nafta\",\n  \"transmision\": \"Manual\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/vehiculos", "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+              "pm.test('El error apunta al campo Anio', () => {",
+              "  pm.expect(JSON.stringify(pm.response.json().errores)).to.include('Anio');",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "POST /api/vehiculos — marca inexistente devuelve 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"marcaId\": 99999,\n  \"modelo\": \"Fantasma\",\n  \"anio\": 2020,\n  \"precio\": 10000,\n  \"kilometraje\": 1000,\n  \"combustible\": \"Nafta\",\n  \"transmision\": \"Manual\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/vehiculos", "host": ["{{baseUrl}}"], "path": ["api", "vehiculos"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 400', () => pm.response.to.have.status(400));",
+              "pm.test('Explica que la marca no existe', () => {",
+              "  pm.expect(pm.response.json().mensaje.toLowerCase()).to.include('marca');",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "GET /api/vehiculos/{id} — detalle del creado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos/{{vehiculoId}}",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos", "{{vehiculoId}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Es el vehículo que creamos', () => {",
+              "  pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('vehiculoId')));",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "GET /api/vehiculos/999999 — inexistente devuelve 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/vehiculos/999999", "host": ["{{baseUrl}}"], "path": ["api", "vehiculos", "999999"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 404', () => pm.response.to.have.status(404));",
+              "pm.test('Trae un mensaje explicativo', () => pm.expect(pm.response.json().mensaje).to.be.a('string'));"
+            ]}
+          }]
+        },
+        {
+          "name": "PUT /api/vehiculos/{id} — actualiza el precio",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"marcaId\": 7,\n  \"modelo\": \"Yaris XS\",\n  \"anio\": 2021,\n  \"precio\": 17500,\n  \"kilometraje\": 39000,\n  \"combustible\": \"Nafta\",\n  \"transmision\": \"Manual\",\n  \"color\": \"Blanco\",\n  \"vendido\": false\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos/{{vehiculoId}}",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos", "{{vehiculoId}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('El precio quedó actualizado', () => pm.expect(pm.response.json().precio).to.eql(17500));"
+            ]}
+          }]
+        },
+        {
+          "name": "PATCH /api/vehiculos/{id}/estado-venta — marcar vendido",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"vendido\": true\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos/{{vehiculoId}}/estado-venta",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos", "{{vehiculoId}}", "estado-venta"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Queda marcado como vendido', () => pm.expect(pm.response.json().vendido).to.be.true);"
+            ]}
+          }]
+        },
+        {
+          "name": "DELETE /api/vehiculos/{id} — elimina el de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehiculos/{{vehiculoId}}",
+              "host": ["{{baseUrl}}"], "path": ["api", "vehiculos", "{{vehiculoId}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.test('Responde 204', () => pm.response.to.have.status(204));",
+              "pm.test('No devuelve cuerpo', () => pm.expect(pm.response.text()).to.be.empty);"
+            ]}
+          }]
+        }
+      ]
+    }
+  ]
+}

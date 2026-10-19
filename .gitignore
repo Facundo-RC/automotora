@@ -1,0 +1,18 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Base de datos local
+*.mdf
+*.ldf
+
+# Configuración local con credenciales
+appsettings.Local.json
+appsettings.Production.json
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
