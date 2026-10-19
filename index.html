@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotora — Catálogo de vehículos</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera__interior">
+      <a href="#" class="logo">Automotora</a>
+      <button id="btnNuevo" class="boton boton--primario">+ Publicar vehículo</button>
+    </div>
+  </header>
+
+  <div id="bannerDemo" class="banner-demo" hidden role="status">
+    <strong>Modo demostración.</strong>
+    La API no está disponible en esta página, así que el catálogo se carga con datos de
+    ejemplo. Podés filtrar, publicar, editar y borrar: todo funciona, pero los cambios
+    viven sólo en tu navegador y se pierden al recargar.
+    <a href="https://github.com/Facundo-RC/automotora" target="_blank" rel="noopener">
+      Cómo correrlo con la API real
+    </a>
+  </div>
+
+  <main class="contenedor">
+
+    <section class="filtros" aria-label="Filtros de búsqueda">
+      <div class="filtros__fila">
+        <div class="campo campo--ancho">
+          <label for="fTexto">Buscar</label>
+          <input type="search" id="fTexto" placeholder="Modelo, marca o descripción">
+        </div>
+        <div class="campo">
+          <label for="fMarca">Marca</label>
+          <select id="fMarca"><option value="">Todas</option></select>
+        </div>
+        <div class="campo">
+          <label for="fCombustible">Combustible</label>
+          <select id="fCombustible">
+            <option value="">Todos</option>
+            <option value="Nafta">Nafta</option>
+            <option value="Diesel">Diésel</option>
+            <option value="Hibrido">Híbrido</option>
+            <option value="Electrico">Eléctrico</option>
+            <option value="Gnc">GNC</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fTransmision">Transmisión</label>
+          <select id="fTransmision">
+            <option value="">Todas</option>
+            <option value="Manual">Manual</option>
+            <option value="Automatica">Automática</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filtros__fila">
+        <div class="campo campo--chico">
+          <label for="fAnioMin">Año desde</label>
+          <input type="number" id="fAnioMin" min="1900" max="2100" placeholder="2015">
+        </div>
+        <div class="campo campo--chico">
+          <label for="fAnioMax">Año hasta</label>
+          <input type="number" id="fAnioMax" min="1900" max="2100" placeholder="2026">
+        </div>
+        <div class="campo campo--chico">
+          <label for="fPrecioMin">Precio desde (USD)</label>
+          <input type="number" id="fPrecioMin" min="0" placeholder="10000">
+        </div>
+        <div class="campo campo--chico">
+          <label for="fPrecioMax">Precio hasta (USD)</label>
+          <input type="number" id="fPrecioMax" min="0" placeholder="40000">
+        </div>
+        <div class="campo">
+          <label for="fOrden">Ordenar por</label>
+          <select id="fOrden">
+            <option value="">Más recientes</option>
+            <option value="precio">Precio: menor a mayor</option>
+            <option value="precio_desc">Precio: mayor a menor</option>
+            <option value="anio_desc">Año: más nuevos</option>
+            <option value="anio">Año: más viejos</option>
+            <option value="km">Menor kilometraje</option>
+          </select>
+        </div>
+        <div class="campo campo--acciones">
+          <label class="check">
+            <input type="checkbox" id="fDisponibles" checked>
+            Solo disponibles
+          </label>
+          <button id="btnLimpiar" class="boton boton--texto">Limpiar</button>
+        </div>
+      </div>
+    </section>
+
+    <p id="resumen" class="resumen" role="status" aria-live="polite"></p>
+
+    <section id="grilla" class="grilla" aria-label="Resultados"></section>
+
+    <nav id="paginado" class="paginado" aria-label="Paginación"></nav>
+
+  </main>
+
+  <!-- Modal de alta / edición -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal__caja" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+      <div class="modal__cabecera">
+        <h2 id="modalTitulo">Publicar vehículo</h2>
+        <button id="btnCerrar" class="boton boton--icono" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <form id="formVehiculo" novalidate>
+        <input type="hidden" id="vId">
+
+        <div class="form__fila">
+          <div class="campo">
+            <label for="vMarca">Marca *</label>
+            <select id="vMarca" required></select>
+            <small class="error" data-error="MarcaId"></small>
+          </div>
+          <div class="campo">
+            <label for="vModelo">Modelo *</label>
+            <input type="text" id="vModelo" maxlength="80" required>
+            <small class="error" data-error="Modelo"></small>
+          </div>
+        </div>
+
+        <div class="form__fila">
+          <div class="campo">
+            <label for="vAnio">Año *</label>
+            <input type="number" id="vAnio" min="1900" max="2100" required>
+            <small class="error" data-error="Anio"></small>
+          </div>
+          <div class="campo">
+            <label for="vPrecio">Precio (USD) *</label>
+            <input type="number" id="vPrecio" min="1" step="0.01" required>
+            <small class="error" data-error="Precio"></small>
+          </div>
+          <div class="campo">
+            <label for="vKm">Kilometraje *</label>
+            <input type="number" id="vKm" min="0" required>
+            <small class="error" data-error="Kilometraje"></small>
+          </div>
+        </div>
+
+        <div class="form__fila">
+          <div class="campo">
+            <label for="vCombustible">Combustible</label>
+            <select id="vCombustible">
+              <option value="Nafta">Nafta</option>
+              <option value="Diesel">Diésel</option>
+              <option value="Hibrido">Híbrido</option>
+              <option value="Electrico">Eléctrico</option>
+              <option value="Gnc">GNC</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="vTransmision">Transmisión</label>
+            <select id="vTransmision">
+              <option value="Manual">Manual</option>
+              <option value="Automatica">Automática</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="vColor">Color</label>
+            <input type="text" id="vColor" maxlength="40">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="vImagen">URL de la imagen</label>
+          <input type="url" id="vImagen" maxlength="300" placeholder="https://...">
+          <small class="error" data-error="ImagenUrl"></small>
+        </div>
+
+        <div class="campo">
+          <label for="vDescripcion">Descripción</label>
+          <textarea id="vDescripcion" rows="3" maxlength="1000"></textarea>
+          <small class="error" data-error="Descripcion"></small>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="vVendido">
+          Marcado como vendido
+        </label>
+
+        <p id="formError" class="alerta alerta--error" hidden></p>
+
+        <div class="modal__pie">
+          <button type="button" id="btnCancelar" class="boton boton--texto">Cancelar</button>
+          <button type="submit" id="btnGuardar" class="boton boton--primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="aviso" class="aviso" hidden role="status" aria-live="polite"></div>
+
+  <script src="js/demo.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
