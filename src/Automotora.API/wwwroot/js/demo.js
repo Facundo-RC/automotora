@@ -21,7 +21,9 @@ const demo = (() => {
   async function asegurarDatos() {
     if (cargado) return;
 
-    const respuesta = await fetch(RUTA_DATOS);
+    // no-cache obliga a revalidar: si no, el navegador puede servir una copia
+    // vieja del catalogo durante horas despues de publicar un cambio.
+    const respuesta = await fetch(RUTA_DATOS, { cache: 'no-cache' });
     if (!respuesta.ok) {
       throw new ErrorApi('No se pudieron cargar los datos de ejemplo.');
     }
